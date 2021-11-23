@@ -2,9 +2,7 @@ package zendesk.coding.challenge;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.net.URL;
-import java.util.Base64;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
 public class TicketViewer
 {
@@ -16,19 +14,24 @@ public class TicketViewer
 		while (true)
 		{
 			showOptions();
-			Optional<String> optional = getInput();
-			if (optional.isPresent())
+			Optional<String> inputOption = getInput();
+			if (inputOption.isPresent())
 			{
-				String input = optional.get();
+				String input = inputOption.get();
 				switch (input)
 				{
 					case "1" ->
 					{
-
+						Optional<String> httpsOption = getResponse("https://zccdavidwkohler.zendesk.com/api/v2/tickets.json");
+						if (httpsOption.isPresent())
+						{
+							String json = httpsOption.get();
+						} else
+							System.out.println("The Zendesk API is currently unavailable! Please try again later!");
 					}
 				}
 			} else
-				System.out.println("Invalid Input - Please try again!");
+				System.out.println("Invalid Response! Please try again!");
 		}
 	}
 
@@ -56,25 +59,33 @@ public class TicketViewer
 	}
 
 	/**
-	 *
 	 * @return {@code Optional<String>} of HTTPS Json Response from Zendesk API
 	 */
-	public Optional<String> getHttps(String address)
+	public Optional<String> getResponse(String url)
 	{
 		try
 		{
-			URL url = new URL(address);
-			HttpsURLConnection https = (HttpsURLConnection) url.openConnection();
+			HttpsURLConnection https = (HttpsURLConnection) new URL(url).openConnection();
+
 			https.setRequestMethod("GET");
 			https.setRequestProperty("Content-Type", "application/json");
+			https.setRequestProperty("Accept", "application/json");
 			https.setRequestProperty("Authorization", "Basic "+getBase64("MyEmail", "MyPassword"));
+			if (https.getResponseCode() == 200)
+			{
+				https.disconnect();
+				return Optional.of(https.getResponseMessage());
+			}
 		} catch (Exception e)
 		{
-			e.printStackTrace();
+			System.out.println("There was an error in parsing the url request.");
 		}
 		return Optional.empty();
 	}
 
+	/**
+	 * @return Base64 encoding of entered email and password
+	 */
 	public String getBase64(String email, String password)
 	{
 		final String credentials = email+':'+password;
