@@ -151,6 +151,9 @@ public class TicketViewer
 		}).start();
 	}
 
+	/**
+	 * Displays tickets with given offset!
+	 */
 	private void openAllTickets(int offset)
 	{
 		for (int i = 0; i < 25 && tickets.size()>i+offset; i++)
