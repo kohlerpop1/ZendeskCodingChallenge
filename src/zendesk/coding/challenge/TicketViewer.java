@@ -10,10 +10,13 @@ import java.util.*;
 public class TicketViewer
 {
 	private final List<Ticket> tickets;
+
 	public TicketViewer()
 	{
 		//Displaying welcome message and options!
+		System.out.println();
 		System.out.println("Welcome to the Zendesk Coding Challenge Ticket Viewer!");
+		System.out.println();
 
 		//Upon startup of the program, we know the user will be requesting tickets, so we shall cache them immediately in the background.
 		tickets = new ArrayList<>();
@@ -37,7 +40,7 @@ public class TicketViewer
 					{
 						if (!tickets.isEmpty())
 						{
-
+							openAllTickets(0);
 						} else
 							System.out.println("The Zendesk API is currently unavailable! Please try again later!");
 					}
@@ -48,8 +51,21 @@ public class TicketViewer
 						Optional<String> ticketID = getInput();
 						if (ticketID.isPresent())
 						{
-
-						}
+							try {
+								int number = Integer.parseInt(ticketID.get());
+								Optional<Ticket> ticketOption = tickets.stream().filter(ticket -> ticket.getID() == number).findAny();
+								if (ticketOption.isPresent())
+								{
+									System.out.println();
+									System.out.println(ticketOption.get());
+								}
+								else
+									System.out.println("Invalid Response! Please enter a number between 1 and "+tickets.size()+"!");
+							} catch (NumberFormatException e) {
+								System.out.println("Invalid Response! Please enter a number between 1 and "+tickets.size()+"!");
+							}
+						} else
+							System.out.println("Invalid Response! Please enter a number between 1 and "+tickets.size()+"!");
 					}
 
 					case "3" ->
@@ -126,17 +142,33 @@ public class TicketViewer
 				String json = httpsOption.get();
 				LinkedTreeMap<Object, Object> map = new Gson().fromJson(json, LinkedTreeMap.class);
 
-				System.out.println(map);
 				for (LinkedTreeMap ticket : (List<LinkedTreeMap>) map.get("tickets"))
 					tickets.add(new Ticket(ticket));
 
 				if (map.containsKey("next_page"))
 					cacheTickets(map.get("next_page") instanceof String next ? next : "");
-
-				//Then sorting them by ticket ID in the list!
-				tickets.sort(Comparator.comparing(Ticket::getID));
-				System.out.println(tickets);
 			}
 		}).start();
+	}
+
+	private void openAllTickets(int offset)
+	{
+		for (int i = 0; i < 25 && tickets.size()>i+offset; i++)
+			System.out.println(tickets.get(i+offset));
+		System.out.println("N: Next Page - B: Previous Page - Q: Main Menu");
+		System.out.print("Selection: ");
+		Optional<String> input = getInput();
+		if (input.isPresent())
+		{
+			switch (input.get().toLowerCase())
+			{
+				case "n" -> offset=Math.min(tickets.size(), offset+25);
+				case "b" -> offset=Math.max(0, offset-25);
+				default -> offset = -1;
+			}
+
+			if (offset >= 0)
+				openAllTickets(offset);
+		}
 	}
 }
