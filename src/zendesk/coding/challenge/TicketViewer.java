@@ -9,7 +9,7 @@ import java.util.*;
 
 public class TicketViewer
 {
-	private List<Ticket> tickets;
+	private final List<Ticket> tickets;
 	public TicketViewer()
 	{
 		//Displaying welcome message and options!
@@ -17,11 +17,16 @@ public class TicketViewer
 
 		//Upon startup of the program, we know the user will be requesting tickets, so we shall cache them immediately in the background.
 		tickets = new ArrayList<>();
-		cacheTickets();
+		cacheTickets("https://zccdavidwkohler.zendesk.com/api/v2/tickets");
 
 		while (true)
 		{
-			showOptions();
+			System.out.println("Menu Options:");
+			System.out.println("\tPress 1 - View All Tickets");
+			System.out.println("\tPress 2 - View Individual Ticket");
+			System.out.println("\tPress 3 - Exit Application");
+			System.out.print("Option: ");
+
 			Optional<String> inputOption = getInput();
 			if (inputOption.isPresent())
 			{
@@ -39,8 +44,9 @@ public class TicketViewer
 
 					case "2" ->
 					{
-						Optional<String> ticketNumber = getInput();
-						if (ticketNumber.isPresent())
+						System.out.print("Enter Ticket ID: ");
+						Optional<String> ticketID = getInput();
+						if (ticketID.isPresent())
 						{
 
 						}
@@ -55,18 +61,6 @@ public class TicketViewer
 			} else
 				System.out.println("Invalid Response! Please try again!");
 		}
-	}
-
-	/**
-	 * Displays menu options to user!
-	 */
-	public void showOptions()
-	{
-		System.out.println("Menu Options:");
-		System.out.println("\tPress 1 - View All Tickets");
-		System.out.println("\tPress 2 - View Individual Ticket");
-		System.out.println("\tPress 3 - Exit Application");
-		System.out.print("Option: ");
 	}
 
 	/**
@@ -85,24 +79,27 @@ public class TicketViewer
 	 */
 	public Optional<String> getResponse(String url)
 	{
-		try
+		if (!url.isEmpty())
 		{
-			HttpsURLConnection https = (HttpsURLConnection) new URL(url).openConnection();
-
-			https.setRequestMethod("GET");
-			https.setRequestProperty("Content-Type", "application/json");
-			https.setRequestProperty("Accept", "application/json");
-			https.setRequestProperty("Authorization", "Basic "+getBase64("", ""));
-			if (https.getResponseCode() == 200)
+			try
 			{
-				String response = new String(https.getInputStream().readAllBytes());
-				https.disconnect();
-				return Optional.of(response);
+				HttpsURLConnection https = (HttpsURLConnection) new URL(url).openConnection();
+
+				https.setRequestMethod("GET");
+				https.setRequestProperty("Content-Type", "application/json");
+				https.setRequestProperty("Accept", "application/json");
+				https.setRequestProperty("Authorization", "Basic " + getBase64("MyEmail", "MyPassword"));
+				if (https.getResponseCode() == 200)
+				{
+					String response = new String(https.getInputStream().readAllBytes());
+					https.disconnect();
+					return Optional.of(response);
+				}
+			} catch (Exception e)
+			{
+				System.out.println("There was an error in parsing the url request.");
+				e.printStackTrace();
 			}
-		} catch (Exception e)
-		{
-			System.out.println("There was an error in parsing the url request.");
-			e.printStackTrace();
 		}
 		return Optional.empty();
 	}
@@ -119,30 +116,26 @@ public class TicketViewer
 	/**
 	 * Caching tickets in background for smoother user experience
 	 */
-	private void cacheTickets()
+	private void cacheTickets(String url)
 	{
 		new Thread(()->
 		{
-			Optional<String> httpsOption = getResponse("https://zccdavidwkohler.zendesk.com/api/v2/tickets/count");
+			Optional<String> httpsOption = getResponse(url);
 			if (httpsOption.isPresent())
 			{
 				String json = httpsOption.get();
-				LinkedTreeMap<Object, LinkedTreeMap> map = new Gson().fromJson(json, LinkedTreeMap.class);
-				double ticketCount = (double) map.get("count").get("value");
-				for (int i = 1; i <= ticketCount; i++)
-				{
-					int finalI = i;
-					new Thread(()-> getResponse("https://zccdavidwkohler.zendesk.com/api/v2/tickets/"+finalI).ifPresent(s -> tickets.add(new Ticket(s)))).start();
-				}
+				LinkedTreeMap<Object, Object> map = new Gson().fromJson(json, LinkedTreeMap.class);
 
-				try {
-					//Sleeping for 1/10th of a second in the background thread to allow all tickets to load
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+				System.out.println(map);
+				for (LinkedTreeMap ticket : (List<LinkedTreeMap>) map.get("tickets"))
+					tickets.add(new Ticket(ticket));
 
-//				tickets.sort();
+				if (map.containsKey("next_page"))
+					cacheTickets(map.get("next_page") instanceof String next ? next : "");
+
+				//Then sorting them by ticket ID in the list!
+				tickets.sort(Comparator.comparing(Ticket::getID));
+				System.out.println(tickets);
 			}
 		}).start();
 	}
