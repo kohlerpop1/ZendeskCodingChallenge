@@ -1,22 +1,29 @@
 # ZendeskCodingChallenge
 Code for Zendesk Coding Challenge Internship
 
-# Installation Instructions:
-- Install Java JDK 17
-  https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html
 
-- Download: Source Code & Compile *or* Precompiled Jar!
+# Installation Instructions
+- Install Java JDK 17 *(<a href="https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html">Download</a>)*
 
-- Dependencies: Gson *Included in Precompiled Jar or Download: https://github.com/google/gson*
+- Download:
+  - Source Code & Compile *(Dependency Gson Required - <a href="https://github.com/google/gson">Download</a>)* or
+  - Precompiled Jar *(Dependency Gson Included)*
 
-# After Installation: 
-Open console/terminal in the installation directory
-Run 'java -jar ZendeskCodingChallenge.jar' to begin! 
-Follow steps on screen for easy user interaction!
 
-Usage Instructions:
+# After Installation:
+1. Open console/terminal in the installation directory
+2. Run 'java -jar ZendeskCodingChallenge.jar' to begin! 
+3. Follow steps on screen for easy user interaction!
+
+
+# Usage Instructions
 1. Start Application!
-2. Press 1 to view all tickets, 2 to view ticket by ID, or 3 to exit the application.
-  a. If 1 was pressed, 25 will be displayed at a time. Press N for next page, B for previous page, or Q to return to the main menu!
+2. Steps & Processes:
+  - Press 1 to view all tickets *(Displays 25 tickets at a time)*
+    - Press N for next tickets page
+    - Press B for previous tickets page
+    - Press Q to return to the main menu
+  - Press 2 to view ticket by ID
+  - Press 3 to exit the application
   
 Enjoy the Ticket Viewer!
