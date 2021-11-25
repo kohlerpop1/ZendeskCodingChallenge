@@ -1,20 +1,15 @@
 # ZendeskCodingChallenge
 Code for Zendesk Coding Challenge Internship
 
-Installation Instructions:
+# Installation Instructions:
 - Install Java JDK 17
   https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html
 
-- Download Source Code and Compile
-  or
-- Download Precompiled Jar!
+- Download: Source Code & Compile *or* Precompiled Jar!
 
-- Dependencies: Gson
-  Included with Precompiled Jar
-  or 
-  Download here: https://github.com/google/gson
+- Dependencies: Gson *Included in Precompiled Jar or Download: https://github.com/google/gson*
 
-After Installation: 
+# After Installation: 
 Open console/terminal in the installation directory
 Run 'java -jar ZendeskCodingChallenge.jar' to begin! 
 Follow steps on screen for easy user interaction!
